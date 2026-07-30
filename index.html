@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>厦大信院本科新生答疑</title>
+  <meta name="description" content="厦门大学信息学院2026级本科新生答疑平台——解答你的每一个疑问，开启精彩的大学生活">
+  <link rel="stylesheet" href="css/style.css?v=3">
+</head>
+<body>
+  <!-- 页头导航 -->
+  <header id="site-header">
+    <div class="header-inner">
+      <a href="#home" class="brand">
+        <span class="brand-icon" id="brand-icon"></span>
+        <span class="brand-text">
+          <strong id="brand-name"></strong>
+          <small id="brand-sub"></small>
+        </span>
+      </a>
+      <nav id="main-nav" aria-label="主导航"></nav>
+      <button id="menu-toggle" aria-label="打开菜单" aria-expanded="false"></button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero 搜索区 -->
+    <section id="home" class="hero">
+      <div class="hero-bg" aria-hidden="true"></div>
+      <div class="hero-content">
+        <div class="hero-badge">
+          <span data-icon="sparkles"></span>
+          <span id="hero-badge-text"></span>
+        </div>
+        <h1 id="hero-title"></h1>
+        <p id="hero-subtitle" class="hero-subtitle"></p>
+        <div class="hero-search-wrap">
+          <form id="hero-search" class="hero-search" role="search">
+            <span data-icon="search" class="search-icon"></span>
+            <input type="search" id="search-input" autocomplete="off">
+            <button type="submit" class="search-btn">搜索</button>
+          </form>
+          <div id="search-results" class="search-results" hidden></div>
+        </div>
+        <div class="hot-searches" id="hot-searches"></div>
+      </div>
+      <div class="hero-fade" aria-hidden="true"></div>
+    </section>
+
+    <!-- 校园掠影（图片轮播，属首页内容，不入导航） -->
+    <section class="gallery" id="gallery" aria-label="校园照片">
+      <div class="gallery-viewport" id="gallery-viewport">
+        <div class="gallery-track" id="gallery-track"></div>
+      </div>
+      <button class="gallery-arrow prev" id="gallery-prev" aria-label="上一张">
+        <span data-icon="chevron-left"></span>
+      </button>
+      <button class="gallery-arrow next" id="gallery-next" aria-label="下一张">
+        <span data-icon="chevron-right"></span>
+      </button>
+    </section>
+
+    <!-- 新生手册（推广入口） -->
+    <section id="handbook" class="section section-muted">
+      <div class="container">
+        <div class="handbook-card reveal">
+          <div class="handbook-info">
+            <div class="handbook-icon"><span data-icon="book-open"></span></div>
+            <div class="handbook-text">
+              <h2 class="handbook-title">新生手册 <span class="badge-new">NEW</span></h2>
+              <p class="handbook-desc">信息学院团委 · 学生会出品的新生手册在线版：学院介绍、军训须知、学习攻略、美食出行、校园设施、就医指南全收录，支持章节目录、全文搜索与页内跳转。</p>
+              <div class="handbook-tags">
+                <span>学院介绍</span><span>军训须知</span><span>学习攻略</span><span>校内美食</span><span>出行指南</span><span>校园网</span>
+              </div>
+            </div>
+          </div>
+          <a class="handbook-cta" href="handbook/index.html">开始阅读<span data-icon="chevron-right"></span></a>
+        </div>
+      </div>
+    </section>
+
+    <!-- 常见问题（按六大板块分类浏览） -->
+    <section id="faq" class="section">
+      <div class="container">
+        <div class="section-head">
+          <h2>常见问题</h2>
+          <p>点击板块卡片查看问答，支持板块内搜索</p>
+        </div>
+        <div class="category-grid" id="category-grid"></div>
+      </div>
+    </section>
+
+    <!-- 时间线 -->
+    <section id="timeline" class="section section-muted">
+      <div class="container">
+        <div class="section-head">
+          <h2 id="timeline-title"></h2>
+          <p>从入学到第一学期结束，关键节点一目了然</p>
+          <p class="section-hint">9月安排依据《2026年秋季入学工作时间安排表》（学生工作部2026年6月4日印发），具体以学校最新通知为准</p>
+        </div>
+        <div class="timeline" id="timeline-list"></div>
+      </div>
+    </section>
+
+    <!-- 快速链接 -->
+    <section id="links" class="section">
+      <div class="container">
+        <div class="section-head">
+          <h2 id="links-title"></h2>
+          <p>2026级新生常用系统入口，一键直达</p>
+        </div>
+        <div class="links-grid" id="links-grid"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 页脚 -->
+  <footer id="about" class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <h3 id="footer-name"></h3>
+          <p class="footer-tagline" id="footer-tagline"></p>
+          <ul class="footer-contact" id="footer-contact"></ul>
+        </div>
+        <div class="footer-col">
+          <h3>快速导航</h3>
+          <ul class="footer-nav" id="footer-nav"></ul>
+        </div>
+        <div class="footer-col">
+          <h3>友情链接</h3>
+          <ul class="footer-links" id="footer-links"></ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p id="copyright"></p>
+        <button id="back-to-top" class="back-to-top">
+          <span data-icon="arrow-up"></span>返回顶部
+        </button>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 板块问答弹窗 -->
+  <div class="faq-modal" id="faq-modal" hidden>
+    <div class="faq-modal-backdrop" id="faq-modal-backdrop"></div>
+    <div class="faq-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="faq-modal-cat">
+      <div class="faq-modal-head">
+        <div class="faq-modal-title">
+          <span class="panel-cat" id="faq-modal-cat"></span>
+          <span class="panel-subs" id="faq-modal-subs"></span>
+        </div>
+        <button class="faq-modal-close" id="faq-modal-close" aria-label="关闭">
+          <span data-icon="x"></span>
+        </button>
+      </div>
+      <div class="faq-modal-search">
+        <span data-icon="search"></span>
+        <input type="search" id="faq-modal-input" placeholder="在该板块内搜索问题…" autocomplete="off">
+      </div>
+      <div class="faq-modal-body">
+        <div class="faq-list" id="faq-list"></div>
+        <div class="faq-empty" id="faq-empty" hidden>
+          <span data-icon="search-x"></span>
+          <p></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="pic/photos.js"></script>
+  <script src="js/data.js?v=24"></script>
+  <script src="js/app.js?v=24"></script>
+</body>
+</html>
