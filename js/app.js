@@ -30,6 +30,7 @@
     'check': '<path d="M20 6 9 17l-5-5"/>',
     'pin': '<path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7h1a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2h1v3.76z"/>',
     'download': '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/>',
+    'external': '<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>',
     'star': '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
     'globe': '<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>',
     'layout-grid': '<rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/>',
@@ -224,10 +225,14 @@
         '<div class="faq-answer"><div class="faq-answer-inner"><p>' +
           highlight(f.answer, kw) +
         '</p>' +
-        (f.link
-          ? '<a class="faq-attach" href="' + esc(f.link.url) + '" download>' +
-            icon('download') + esc(f.link.label) + '</a>'
-          : '') +
+        (function () {
+          if (!f.link) return '';
+          var ext = /^https?:/.test(f.link.url);
+          /* 外链 → 新标签页打开；站内文件 → 直接下载 */
+          return '<a class="faq-attach" href="' + esc(f.link.url) + '"' +
+            (ext ? ' target="_blank" rel="noopener noreferrer"' : ' download') + '>' +
+            icon(ext ? 'external' : 'download') + esc(f.link.label) + '</a>';
+        })() +
         '</div></div>';
 
       var btn = item.querySelector('.faq-question');
@@ -460,12 +465,17 @@
     var index = N; /* 从中间一份开始，两侧均有图 */
     var timer = null;
 
-    function slideW() {
+    function dims() {
       var first = track.children[0];
-      return first.offsetWidth + parseFloat(getComputedStyle(first).marginRight);
+      return {
+        box: first.offsetWidth, /* 可视滑块宽（不含外边距） */
+        slot: first.offsetWidth + parseFloat(getComputedStyle(first).marginRight) /* 步进槽宽 */
+      };
     }
     function offsetOf(i) {
-      return (viewport.clientWidth - slideW()) / 2 - i * slideW();
+      /* 居中可视滑块；步进按槽宽（修复：原先把外边距算进居中宽度，整体偏左半个 margin） */
+      var d = dims();
+      return (viewport.clientWidth - d.box) / 2 - i * d.slot;
     }
     function apply(animate) {
       track.style.transition = animate ? '' : 'none';
@@ -521,7 +531,7 @@
     function endDrag(e) {
       if (!dragging) return;
       dragging = false;
-      index = startIndex + Math.round((startX - e.clientX) / slideW());
+      index = startIndex + Math.round((startX - e.clientX) / dims().slot);
       if (index < N) index = N;             /* 钳位，避免拖出空档 */
       if (index > 2 * N - 1) index = 2 * N - 1;
       apply(true);

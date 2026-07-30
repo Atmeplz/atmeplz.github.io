@@ -235,6 +235,8 @@ svg.icon {
 }
 .hero-search input::placeholder { color: #9aa5bb; }
 .search-btn {
+  flex-shrink: 0;
+  white-space: nowrap; /* 窄屏下"搜索"二字不折行、高度不溢出 */
   border: 0;
   background: var(--primary);
   color: #fff;
@@ -1079,4 +1081,5 @@ body.modal-open { overflow: hidden; }
   .footer-grid { grid-template-columns: 1fr; gap: 28px; }
   .section { padding: 52px 0; }
   .hero { min-height: 480px; }
+  .search-btn { padding: 10px 18px; }
 }

@@ -7,15 +7,17 @@
 """
 import os
 import json
+import re
 
 NAMES = {
     "01.jpg": "信院",
     "02.jpg": "小巨蛋",
     "03.jpg": "德旺图书馆",
-    "04.jpg": "晚霞",
-    "05.jpg": "楼群",
     "06.jpg": "社团",
-    "07.jpg": "黑天鹅",
+    "07.jpg": "校园",
+    "08.jpg": "军训拉练",
+    "09.jpg": "篮球赛",
+    "10.jpg": "十佳歌手",
 }
 
 EXTS = ('.jpg', '.jpeg', '.png', '.webp', '.gif')
@@ -33,3 +35,17 @@ with open(os.path.join(here, 'photos.js'), 'w', encoding='utf-8', newline='\n') 
     fp.write(out)
 
 print('已生成 photos.js，共 %d 张：%s' % (len(files), ', '.join(files)))
+
+# 同步提升 index.html 中 photos.js 的版本号，避免浏览器缓存旧清单
+index_path = os.path.join(here, '..', 'index.html')
+with open(index_path, encoding='utf-8') as fp:
+    html = fp.read()
+m = re.search(r'pic/photos\.js\?v=(\d+)', html)
+if m:
+    html = re.sub(r'pic/photos\.js\?v=\d+',
+                  'pic/photos.js?v=%d' % (int(m.group(1)) + 1), html)
+else:
+    html = html.replace('pic/photos.js', 'pic/photos.js?v=1', 1)
+with open(index_path, 'w', encoding='utf-8', newline='') as fp:
+    fp.write(html)
+print('index.html 引用版本已同步（缓存自动失效）')

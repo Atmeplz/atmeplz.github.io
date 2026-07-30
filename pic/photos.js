@@ -12,19 +12,23 @@ window.PICTURE_LIST = [
     "name": "德旺图书馆"
   },
   {
-    "file": "04.jpg",
-    "name": "晚霞"
-  },
-  {
-    "file": "05.jpg",
-    "name": "楼群"
-  },
-  {
     "file": "06.jpg",
     "name": "社团"
   },
   {
     "file": "07.jpg",
-    "name": "黑天鹅"
+    "name": "校园"
+  },
+  {
+    "file": "08.jpg",
+    "name": "军训拉练"
+  },
+  {
+    "file": "09.jpg",
+    "name": "篮球赛"
+  },
+  {
+    "file": "10.jpg",
+    "name": "十佳歌手"
   }
 ];

@@ -575,6 +575,9 @@ body.sidebar-collapsed .layout { grid-template-columns: 0 minmax(0, 1fr); }
   .content { max-width: none; padding: 20px 16px 48px; }
   /* 页内小标题导航仅桌面端显示 */
   #section-nav { display: none; }
+  /* 页头收紧，避免"新生手册"在细长屏换行 */
+  .header-inner { padding: 0 12px; gap: 10px; }
+  .brand-text strong { white-space: nowrap; }
   .brand-text small { display: none; }
 
   /* 移动端：搜索框退化为图标按钮，点击后以浮层展开 */
