@@ -379,6 +379,20 @@ body.sidebar-collapsed .layout { grid-template-columns: 0 minmax(0, 1fr); }
 .fig-desc { font-size: 13.5px; color: var(--text-muted); line-height: 1.6; }
 .fig-hint { font-size: 11.5px; color: #a5afc4; }
 
+/* 已补入的真实插图：统一宽度为文字流宽度的 4/5，居中显示 */
+.fig-photo {
+  margin: 22px auto;
+  width: 80%; /* 相对正文文字流宽度，80% = 4/5 */
+  text-align: center;
+}
+.fig-photo img {
+  display: block;
+  width: 100%;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
 /* 表格 */
 .table-wrap {
   overflow-x: auto;

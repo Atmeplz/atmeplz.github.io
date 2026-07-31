@@ -372,6 +372,7 @@ svg.icon {
 /* ---------- 通用区块 ---------- */
 .section { padding: 72px 0; }
 .section-muted { background: var(--bg-muted); }
+#handbook.section { padding-top: 36px; }
 
 .section-head { text-align: center; margin-bottom: 44px; }
 .section-head h2 { font-size: clamp(24px, 3.4vw, 30px); margin-bottom: 10px; }
@@ -381,7 +382,7 @@ svg.icon {
 /* ---------- 校园掠影（图片轮播） ---------- */
 .gallery {
   position: relative;
-  padding: 24px 0 6px;
+  padding: 24px 0 0;
   background: var(--bg-muted);
 }
 .gallery-viewport {
@@ -928,6 +929,7 @@ body.modal-open { overflow: hidden; }
   gap: 16px;
 }
 .link-card {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 14px;
@@ -936,6 +938,19 @@ body.modal-open { overflow: hidden; }
   border: 1px solid var(--border);
   border-radius: var(--radius);
   transition: box-shadow .25s, transform .25s, border-color .25s;
+}
+.link-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--danger);
+  padding: 2px 8px;
+  border-radius: 999px;
+  box-shadow: 0 2px 6px rgba(229, 72, 77, .35);
+  pointer-events: none;
 }
 .link-card:hover {
   box-shadow: var(--shadow-md);

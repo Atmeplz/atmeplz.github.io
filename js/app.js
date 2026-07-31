@@ -575,13 +575,14 @@
   var linksGrid = el('links-grid');
   D.quickLinks.forEach(function (l) {
     var a = document.createElement('a');
-    a.className = 'link-card reveal';
+    a.className = 'link-card reveal' + (l.important ? ' link-important' : '');
     a.href = l.url;
     a.target = '_blank';
     a.rel = 'noopener noreferrer';
     a.innerHTML =
       '<span class="link-icon">' + icon(iconKey(l.icon)) + '</span>' +
-      '<span class="link-info"><h3>' + esc(l.title) + '</h3><p>' + esc(l.description) + '</p></span>';
+      '<span class="link-info"><h3>' + esc(l.title) + '</h3><p>' + esc(l.description) + '</p></span>' +
+      (l.important ? '<span class="link-badge">重要</span>' : '');
     linksGrid.appendChild(a);
   });
 

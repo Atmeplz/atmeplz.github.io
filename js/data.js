@@ -980,6 +980,14 @@ window.SITE_DATA = {
   ],
   "quickLinks": [
     {
+      "id": "7",
+      "title": "学工系统",
+      "url": "https://xmuxg.xmu.edu.cn/login",
+      "icon": "Users",
+      "description": "学生事务管理",
+      "important": true
+    },
+    {
       "id": "1",
       "title": "迎新网",
       "url": "https://welcome.xmu.edu.cn",
@@ -1020,13 +1028,6 @@ window.SITE_DATA = {
       "url": "https://xk.xmu.edu.cn",
       "icon": "LayoutGrid",
       "description": "学期选课入口"
-    },
-    {
-      "id": "7",
-      "title": "学工系统",
-      "url": "https://xgxt.xmu.edu.cn",
-      "icon": "Users",
-      "description": "学生事务管理"
     },
     {
       "id": "8",

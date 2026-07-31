@@ -8,11 +8,170 @@
 import json
 import os
 import re
+import shutil
 import sys
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 SRC = os.path.join(BASE, "..", "..", "手册内容")
 OUT = os.path.join(BASE, "..", "js", "content.js")
+
+# 插图目录与命名规则：
+#   handbook/img/ 是站点内唯一插图目录（构建时读取并生成 img/{文件名} 引用）。
+#   - 自动同步的图：{章号}-p{页码}-img{该章第N张图}.png（由 sync_source_images 生成）
+#   - 手动命名：{章号}{描述}.png（中文描述，精确匹配）或 {章号}-p{页码}-{英文}.png（按页码匹配）
+IMG_DIR = os.path.join(BASE, "..", "img")
+
+# 源图片目录：用户只需把自然语言命名的图片放进来，构建时自动匹配并同步到 IMG_DIR
+SRC_IMG_DIR = os.path.join(SRC, "手册插入图片")
+
+# 图片描述元数据：自动同步时记录「img 文件名 -> 占位符描述」，
+# 供 find_image 按自然语言描述精确配对（而不是只按页码顺序猜）
+META_FILE = os.path.join(IMG_DIR, "img-meta.json")
+
+
+def load_img_meta():
+    if os.path.isfile(META_FILE):
+        with open(META_FILE, encoding="utf-8") as f:
+            return json.load(f)
+    return {}
+
+
+def save_img_meta(meta):
+    with open(META_FILE, "w", encoding="utf-8") as f:
+        json.dump(meta, f, ensure_ascii=False, indent=1)
+
+
+IMG_META = {}
+IMG_EXTS = (".png", ".jpg", ".jpeg", ".gif", ".webp")
+
+
+def scan_images():
+    """扫描插图目录，返回文件名列表（按名称排序）。"""
+    if not os.path.isdir(IMG_DIR):
+        return []
+    return sorted(f for f in os.listdir(IMG_DIR) if f.lower().endswith(IMG_EXTS))
+
+
+IMG_FILES = scan_images()
+
+
+def find_image(num, desc, pid):
+    """按命名规则在插图目录中查找与占位符对应的文件，返回文件名或 None。
+    规则（按优先级）：
+    1) {章号}{描述}.png 精确匹配（中文描述命名）；
+    2) 自动同步图片（img-meta.json 记录了描述）在同页内按描述精确匹配；
+    3) 无描述记录的手动命名 {章号}-p{页码}-*.png 按页面顺序匹配。
+    每个文件只被消费一次，且描述不符时不会错配到同页其它占位符。"""
+    # 1) 精确：{章号}{描述}.png
+    exact = f"{num}{desc}.png"
+    if exact in IMG_FILES and exact not in USED_IMAGES:
+        USED_IMAGES.add(exact)
+        return exact
+    # 2) 同页候选
+    if re.fullmatch(r"[\d-]+", pid):
+        prefix = f"{num}-p{pid}-"
+        cands = [f for f in IMG_FILES if f.startswith(prefix) and f not in USED_IMAGES]
+        if cands:
+            norm = normalize_desc(desc)
+            # 优先：描述精确一致（自然语言命名的图）
+            by_desc = [f for f in cands if normalize_desc(IMG_META.get(f, "")) == norm]
+            if by_desc:
+                f = sorted(by_desc)[0]
+                USED_IMAGES.add(f)
+                return f
+            # 其次：无描述记录的手动命名文件
+            manual = [f for f in cands if f not in IMG_META]
+            if manual:
+                f = sorted(manual)[0]
+                USED_IMAGES.add(f)
+                return f
+    return None
+
+
+USED_IMAGES = set()
+
+
+def normalize_desc(desc):
+    """归一化描述文字：去掉空白、中文标点与括号，并把连接词/符号归一为空。
+    覆盖常见差异：空格、括号、引号、顿号、"与/和/及"、"+"、"&"、"×"等。"""
+    text = re.sub(r"[与和及]", "", desc)
+    return re.sub(r"[\s，。、：:；;（）()【】\[\]\"'“”‘’——\-—_·+&/×*]+", "", text)
+
+
+def collect_placeholders():
+    """扫描所有章节 md，收集 (章号, 页码id, 描述) 占位符列表（解析逻辑与 convert 一致）。"""
+    ph = []
+    for fname, num, _t, _p in CHAPTERS:
+        path = os.path.join(SRC, fname)
+        if not os.path.exists(path):
+            continue
+        with open(path, encoding="utf-8") as f:
+            lines = f.read().splitlines()
+        cur_page = "0"
+        for raw in lines:
+            s = raw.strip()
+            if not s:
+                continue
+            m = re.fullmatch(r"<!--\s*p\.([\d.]+)\s*(.*?)\s*-->", s)
+            if m:
+                cur_page = m.group(1)
+                continue
+            if s == "<!-- 封底 -->":
+                cur_page = "封底"
+                continue
+            m = re.fullmatch(r"【(图片|二维码|地图|截图)：(.+)】", s)
+            if m:
+                ph.append((num, cur_page.replace(".", "-"), m.group(2)))
+    return ph
+
+
+def sync_source_images():
+    """把 手册内容/手册插入图片/ 里的自然语言命名图片匹配到占位符，剪切到 handbook/img/。
+
+    匹配规则（按优先级）：
+    1) 文件名与某占位符描述完全相同；
+    2) 文件名以章号开头，且描述互为子串（如“04厦门大学嘉庚风格建筑群照片”）。
+    统一改写为 {章号}-p{页码}-img{序号}.png，随后 find_image 按页码规则自动配对。
+    """
+    if not os.path.isdir(SRC_IMG_DIR):
+        return
+    src_files = sorted(f for f in os.listdir(SRC_IMG_DIR) if f.lower().endswith(IMG_EXTS))
+    if not src_files:
+        print("  源图片目录为空，无需同步")
+        return
+    ph = [(num, pid, desc, normalize_desc(desc)) for num, pid, desc in collect_placeholders()]
+    os.makedirs(IMG_DIR, exist_ok=True)
+    meta = load_img_meta()
+    changed = False
+    for fname in src_files:
+        stem, ext = os.path.splitext(fname)
+        norm = normalize_desc(stem)
+        best = None  # (score, num, pid, desc)
+        for num, pid, desc, nd in ph:
+            if nd == norm:
+                score = 3
+            elif norm.startswith(num) and (nd in norm or norm in nd):
+                score = 2
+            else:
+                score = 0
+            if score > (best[0] if best else 0):
+                best = (score, num, pid, desc)
+        if best is None:
+            print(f"   !! 无法匹配任何占位符：{fname}（已跳过，可手动处理）")
+            continue
+        score, num, pid, desc = best
+        seq = 1 + len([f for f in os.listdir(IMG_DIR) if f.startswith(f"{num}-p{pid}-img")])
+        target = f"{num}-p{pid}-img{seq}{ext.lower()}"
+        target_path = os.path.join(IMG_DIR, target)
+        if os.path.exists(target_path):
+            print(f"   !! 目标已存在，跳过：{fname} -> {target}")
+            continue
+        shutil.move(os.path.join(SRC_IMG_DIR, fname), target_path)
+        meta[target] = desc  # 记录描述，供 find_image 精确配对
+        changed = True
+        print(f"   [同步] {fname} -> {target}（{num}章 第{pid}页：{desc}）")
+    if changed:
+        save_img_meta(meta)
 
 # 章节元数据（顺序即侧边栏顺序）
 CHAPTERS = [
@@ -94,13 +253,23 @@ def convert(num, lines):
             kind, desc = m.group(1), m.group(2)
             fig_count += 1
             pid = cur_page.replace(".", "-")
-            html.append(
-                f'<figure class="fig-placeholder" data-kind="{kind}" id="fig-p{pid}-{fig_count}">'
-                f'<div class="fig-box"><span class="fig-tag">{kind}</span>'
-                f'<span class="fig-desc">{inline(desc)}</span>'
-                f'<span class="fig-hint">插图待补</span></div>'
-                f'</figure>'
-            )
+            figid = f"fig-p{pid}-{fig_count}"
+            img_file = find_image(num, desc, pid)
+            if img_file:
+                print(f"   [图] 章{num} 第{pid}页 已匹配 {img_file}")
+                html.append(
+                    f'<figure class="fig-photo" id="{figid}">'
+                    f'<img src="img/{img_file}" alt="{inline(desc)}">'
+                    f'</figure>'
+                )
+            else:
+                html.append(
+                    f'<figure class="fig-placeholder" data-kind="{kind}" id="{figid}">'
+                    f'<div class="fig-box"><span class="fig-tag">{kind}</span>'
+                    f'<span class="fig-desc">{inline(desc)}</span>'
+                    f'<span class="fig-hint">插图待补</span></div>'
+                    f'</figure>'
+                )
             i += 1
             continue
 
@@ -193,6 +362,12 @@ def convert(num, lines):
     return "\n".join(html)
 
 def main():
+    sync_source_images()
+    global IMG_FILES
+    IMG_FILES = scan_images()
+    global IMG_META
+    IMG_META.update(load_img_meta())
+    print(f"插图目录扫描：{len(IMG_FILES)} 个文件 -> {IMG_FILES or '(空)'}")
     chapters = []
     for fname, num, title, pages in CHAPTERS:
         path = os.path.join(SRC, fname)
