@@ -337,6 +337,21 @@ svg.icon {
   color: var(--text-muted);
   line-height: 1.75;
 }
+/* 手册结果跳转箭头：展开内容后右下角的小按钮，点击在新标签打开对应位置 */
+.sr-goto {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 30px;
+  margin: 0 18px 14px auto;
+  border-radius: 8px;
+  color: #fff;
+  background: var(--primary);
+  transition: background .15s;
+}
+.sr-goto .icon { width: 17px; height: 17px; }
+.sr-goto:hover { background: var(--primary-dark, #2f5cae); }
 .sr-q mark, .sr-a mark {
   background: #fff1a8;
   color: inherit;
@@ -356,6 +371,7 @@ svg.icon {
 .sr-type-faq { background: var(--primary-light); color: var(--primary); }
 .sr-type-timeline { background: #fff3e0; color: #b26a00; }
 .sr-type-category { background: #e8f5e9; color: #2e7d32; }
+.sr-type-handbook { background: #e3f2fd; color: #1565c0; }
 .sr-meta {
   margin-left: 8px;
   font-size: 12px;
@@ -456,6 +472,148 @@ svg.icon {
   .gallery-arrow { width: 36px; height: 36px; }
   .gallery-arrow.prev { left: 10px; }
   .gallery-arrow.next { right: 10px; }
+}
+
+/* ---------- 查看更多（轮播右下角按钮） ---------- */
+.gallery-more {
+  position: absolute;
+  right: 16px;
+  bottom: 14px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 15px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--primary);
+  background: rgba(255, 255, 255, .92);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  box-shadow: var(--shadow-md);
+  transition: background .2s, transform .2s;
+}
+.gallery-more:hover { background: #fff; transform: translateY(-2px); }
+.gallery-more .icon { font-size: 14px; }
+
+/* ---------- 照片墙弹窗 ---------- */
+.photo-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.photo-modal[hidden] { display: none; }
+.photo-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, .5);
+  backdrop-filter: blur(3px);
+  animation: fadeIn .2s ease both;
+}
+.photo-modal-dialog {
+  position: relative;
+  width: 100%;
+  max-width: 860px;
+  max-height: 86vh;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
+  animation: modalUp .25s ease both;
+}
+.photo-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px 10px;
+}
+.photo-modal-title { font-size: 17px; font-weight: 700; }
+.photo-modal-title span {
+  margin-left: 8px;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+.photo-modal-body {
+  overflow-y: auto;
+  padding: 8px 24px 24px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+.photo-thumb {
+  border: 0;
+  padding: 0;
+  background: none;
+  text-align: left;
+  cursor: zoom-in;
+}
+.photo-thumb .ph-img {
+  display: block;
+  aspect-ratio: 5 / 4;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--bg-muted);
+}
+.photo-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform .3s ease;
+}
+.photo-thumb:hover img { transform: scale(1.05); }
+.photo-name {
+  display: block;
+  margin-top: 6px;
+  padding: 0 2px;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------- 照片灯箱（点击放大） ---------- */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px;
+  background: rgba(10, 15, 30, .88);
+  cursor: zoom-out;
+  animation: fadeIn .18s ease both;
+}
+.lightbox[hidden] { display: none; }
+.lightbox img {
+  max-width: 92vw;
+  max-height: 82vh;
+  object-fit: contain;
+  border-radius: 10px;
+  box-shadow: var(--shadow-lg);
+}
+.lightbox-caption { color: rgba(255, 255, 255, .85); font-size: 14px; }
+
+@media (max-width: 760px) {
+  .photo-modal { padding: 12px; }
+  .photo-modal-dialog { max-height: 90vh; }
+  .photo-modal-head { padding: 14px 16px 8px; }
+  .photo-modal-body {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    padding: 6px 16px 16px;
+  }
+  .gallery-more { right: 10px; bottom: 10px; }
 }
 
 /* ---------- 新生手册（推广入口卡片） ---------- */

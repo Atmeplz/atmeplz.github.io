@@ -281,12 +281,53 @@
      时间线、分类指南等内容一并纳入搜索，按相关度排序。 */
   var SEARCH_THRESHOLD = 0.5; // 覆盖率 ≥ 50% 视为相关
 
+  /* 手册搜索索引：把《新生手册》各章 HTML 拆成文本块，记录就近标题作为跳转锚点。
+     与 handbook/js/app.js 的 buildIndex 同思路，仅服务首页搜索框。 */
+  var handbookIndex = [];
+
+  function buildHandbookIndex() {
+    var H = window.HANDBOOK_DATA;
+    if (!H || !H.chapters || !H.chapters.length) return;
+    var container = document.createElement('div');
+    H.chapters.forEach(function (c) {
+      container.innerHTML = c.html;
+      var currentAnchor = null;
+      var currentHeading = c.title;
+      container.querySelectorAll('h2, h3, h4, .chapter-banner, p, li, td, th').forEach(function (el) {
+        if (el.matches('h2, h3, h4, .chapter-banner') && el.id) {
+          currentAnchor = el.id;
+          currentHeading = el.textContent.trim();
+        }
+        var text = el.textContent.replace(/\s+/g, ' ').trim();
+        if (text.length < 4) return;
+        handbookIndex.push({
+          cid: c.id,
+          ctitle: c.title,
+          anchor: currentAnchor,
+          heading: currentHeading,
+          isHeading: el.matches('h2, h3, h4, .chapter-banner'),
+          text: text
+        });
+      });
+    });
+  }
+  buildHandbookIndex();
+
   function searchScore(text, kw) {
     if (text.indexOf(kw) !== -1) return 2;
     if (kw.length < 2) return text.indexOf(kw) !== -1 ? 1 : 0;
     var hits = 0;
     kw.split('').forEach(function (c) { if (text.indexOf(c) !== -1) hits++; });
     return hits / kw.length;
+  }
+
+  /* 手册结果摘要：围绕命中位置截取原文片段（约一句话），前后加省略号 */
+  function snippet(text, kw) {
+    var idx = text.indexOf(kw);
+    if (idx === -1) idx = 0;
+    var from = Math.max(0, idx - 18);
+    var to = Math.min(text.length, idx + kw.length + 46);
+    return (from > 0 ? '…' : '') + text.slice(from, to) + (to < text.length ? '…' : '');
   }
 
   /* 全站搜索：返回按相关度排序的统一结果列表 */
@@ -324,7 +365,41 @@
       }
     });
 
-    return results.sort(function (a, b) { return b.score - a.score; });
+    /* 《新生手册》：命中文本块按相关度排序，同小节只保留一条，最多 6 条 */
+    var hbHits = [];
+    handbookIndex.forEach(function (h) {
+      var s = searchScore(h.text, kw);
+      if (s < SEARCH_THRESHOLD) return;
+      /* 标题命中、文本开头命中额外加分，避免整段长文稀释相关度 */
+      var score = s + (h.isHeading ? 0.5 : 0) + (h.text.indexOf(kw) === 0 ? 0.3 : 0);
+      hbHits.push({ h: h, score: score });
+    });
+    hbHits.sort(function (a, b) { return b.score - a.score; });
+    var hbSeen = {};
+    var hbCount = 0;
+    hbHits.forEach(function (r) {
+      if (hbCount >= 6) return;
+      var h = r.h;
+      var key = h.cid + '|' + (h.anchor || '');
+      if (hbSeen[key]) return;
+      hbSeen[key] = 1;
+      results.push({
+        type: '手册',
+        title: h.ctitle,
+        body: (h.heading && h.heading !== h.ctitle ? h.heading + '：' : '') + snippet(h.text, kw),
+        meta: h.cid,
+        score: r.score,
+        href: 'handbook/index.html#/' + h.cid + '/' + encodeURIComponent(h.anchor)
+      });
+      hbCount++;
+    });
+
+    /* 手册结果整体置后，优先展示问答/时间线/指南；手册之间仍按相关度排序 */
+    return results.sort(function (a, b) {
+      if (a.type === '手册' && b.type !== '手册') return 1;
+      if (a.type !== '手册' && b.type === '手册') return -1;
+      return b.score - a.score;
+    });
   }
 
   /* ============================================
@@ -369,8 +444,13 @@
     if (items.length === 0) {
       html += '<div class="sr-empty">没有找到相关内容，换个关键词试试吧</div>';
     } else {
-      var typeCls = { '问答': 'sr-type-faq', '时间线': 'sr-type-timeline', '指南': 'sr-type-category' };
+      var typeCls = { '问答': 'sr-type-faq', '时间线': 'sr-type-timeline', '指南': 'sr-type-category', '手册': 'sr-type-handbook' };
       html += '<div class="search-results-list">' + items.map(function (r) {
+        /* 带 href 的结果（如手册）：展开区附加一个跳转箭头按钮，点箭头才打开对应位置 */
+        var goto = r.href
+          ? '<a class="sr-goto" href="' + esc(r.href) + '" target="_blank" rel="noopener" title="打开手册对应位置">' +
+            icon('chevron-right') + '</a>'
+          : '';
         return '<div class="sr-item">' +
           '<button type="button" class="sr-q" aria-expanded="false">' +
             '<span><span class="sr-type ' + typeCls[r.type] + '">' + r.type + '</span>' +
@@ -379,7 +459,7 @@
             '</span>' +
             '<span class="faq-chevron">' + icon('chevron-down') + '</span>' +
           '</button>' +
-          '<div class="sr-a"><p>' + highlight(r.body, kw) + '</p></div>' +
+          '<div class="sr-a"><p>' + highlight(r.body, kw) + '</p>' + goto + '</div>' +
         '</div>';
       }).join('') + '</div>';
     }
@@ -395,6 +475,7 @@
     });
     Array.prototype.forEach.call(resultsPanel.querySelectorAll('.sr-q'), function (btn) {
       btn.addEventListener('click', function () {
+        /* 所有结果统一：点击展开/收起原文（手册结果另有箭头按钮跳转） */
         var item = btn.closest('.sr-item');
         var open = item.classList.toggle('open');
         btn.setAttribute('aria-expanded', String(open));
@@ -544,6 +625,66 @@
 
     apply(false);
     startAuto();
+  })();
+
+  /* ============================================
+     照片墙：轮播右下"查看更多" → 全部照片网格 → 点击放大
+     清单 pic/more_web/photos-more.js（prepare_more.py 生成）
+     ============================================ */
+  (function () {
+    var moreBtn = el('gallery-more');
+    if (!moreBtn) return;
+    var modal = el('photo-modal');
+    var lightbox = el('lightbox');
+    var lbImg = el('lightbox-img');
+    var lbCap = el('lightbox-caption');
+    var pics = window.MORE_PICTURE_LIST || [];
+
+    if (!pics.length) { moreBtn.hidden = true; return; }
+    el('photo-count').textContent = '（共 ' + pics.length + ' 张）';
+
+    var grid = el('photo-grid');
+    grid.innerHTML = pics.map(function (p, i) {
+      return '<button type="button" class="photo-thumb" data-i="' + i + '">' +
+        '<span class="ph-img"><img src="pic/more_web/' + encodeURIComponent(p.file) +
+          '" alt="' + esc(p.name) + '" loading="lazy"></span>' +
+        '<span class="photo-name">' + esc(p.name) + '</span>' +
+      '</button>';
+    }).join('');
+
+    function openModal() {
+      modal.hidden = false;
+      document.body.classList.add('modal-open');
+    }
+    function closeModal() {
+      modal.hidden = true;
+      if (lightbox.hidden) document.body.classList.remove('modal-open');
+    }
+    function openLightbox(i) {
+      var p = pics[i];
+      lbImg.src = 'pic/more_web/' + encodeURIComponent(p.file);
+      lbImg.alt = p.name;
+      lbCap.textContent = p.name;
+      lightbox.hidden = false;
+    }
+    function closeLightbox() {
+      lightbox.hidden = true;
+      if (modal.hidden) document.body.classList.remove('modal-open');
+    }
+
+    moreBtn.addEventListener('click', openModal);
+    el('photo-modal-close').addEventListener('click', closeModal);
+    el('photo-modal-backdrop').addEventListener('click', closeModal);
+    grid.addEventListener('click', function (e) {
+      var t = e.target.closest('.photo-thumb');
+      if (t) openLightbox(parseInt(t.dataset.i, 10));
+    });
+    lightbox.addEventListener('click', closeLightbox);
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape') return;
+      if (!lightbox.hidden) closeLightbox();
+      else if (!modal.hidden) closeModal();
+    });
   })();
 
   /* ============================================

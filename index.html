@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>厦大信院本科新生答疑</title>
   <meta name="description" content="厦门大学信息学院2026级本科新生答疑平台——解答你的每一个疑问，开启精彩的大学生活">
-  <link rel="stylesheet" href="css/style.css?v=9">
+  <link rel="stylesheet" href="css/style.css?v=12">
 </head>
 <body>
   <!-- 页头导航 -->
@@ -57,6 +57,9 @@
       </button>
       <button class="gallery-arrow next" id="gallery-next" aria-label="下一张">
         <span data-icon="chevron-right"></span>
+      </button>
+      <button class="gallery-more" id="gallery-more">
+        <span data-icon="layout-grid"></span>查看更多
       </button>
     </section>
 
@@ -168,8 +171,30 @@
     </div>
   </div>
 
+  <!-- 照片墙弹窗 -->
+  <div class="photo-modal" id="photo-modal" hidden>
+    <div class="photo-modal-backdrop" id="photo-modal-backdrop"></div>
+    <div class="photo-modal-dialog" role="dialog" aria-modal="true" aria-label="校园照片墙">
+      <div class="photo-modal-head">
+        <span class="photo-modal-title">校园照片<span id="photo-count"></span></span>
+        <button class="faq-modal-close" id="photo-modal-close" aria-label="关闭">
+          <span data-icon="x"></span>
+        </button>
+      </div>
+      <div class="photo-modal-body" id="photo-grid"></div>
+    </div>
+  </div>
+
+  <!-- 照片灯箱（点击放大） -->
+  <div class="lightbox" id="lightbox" hidden>
+    <img id="lightbox-img" alt="">
+    <p class="lightbox-caption" id="lightbox-caption"></p>
+  </div>
+
 <script src="pic/photos.js?v=1"></script>
+<script src="pic/more_web/photos-more.js?v=1"></script>
 <script src="js/data.js?v=28"></script>
-<script src="js/app.js?v=27"></script>
+<script src="handbook/js/content.js?v=38"></script>
+<script src="js/app.js?v=31"></script>
 </body>
 </html>
