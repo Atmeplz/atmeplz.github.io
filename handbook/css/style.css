@@ -402,6 +402,9 @@ body.sidebar-collapsed .layout { grid-template-columns: 0 minmax(0, 1fr); }
 /* App 图标等小图：原图接近 1:1 显示，避免被拉大到正文宽度而发糊 */
 .fig-icon { max-width: 180px; }
 
+/* 纸质版装饰性小插图（"标题旁""右上方"等位置描述）：比图标更小巧 */
+.fig-deco { max-width: 160px; }
+
 /* 表格 */
 .table-wrap {
   overflow-x: auto;

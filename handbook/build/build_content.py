@@ -90,6 +90,16 @@ def find_image(num, desc, pid):
 
 USED_IMAGES = set()
 
+# 手动档位覆盖：占位符描述 -> 额外 class。
+# 用于自动关键词分类无法区分的特殊图（如"卡通插画/立体插画"装饰小图
+# 与"正文叙事插画"都叫"插画"，无法靠关键词区分时在此显式指定）。
+MANUAL_CLASS_OVERRIDES = {
+    "公交站台与公交车的卡通插画": "fig-deco",
+    "道路与安检闸机的立体插画": "fig-deco",
+    "健身房内人们运动的立体插画": "fig-deco",
+    "音响与派对人物的装饰插画，配大字“运动”": "fig-deco",
+}
+
 
 def normalize_desc(desc):
     """归一化描述文字：去掉空白、中文标点与括号，并把连接词/符号归一为空。
@@ -150,8 +160,12 @@ def sync_source_images():
         for num, pid, desc, nd in ph:
             if nd == norm:
                 score = 3
-            elif norm.startswith(num) and (nd in norm or norm in nd):
-                score = 2
+            elif norm.startswith(num):
+                body = norm[len(num):]  # 去掉章号前缀后再比较，兼容截断的文件名
+                if nd in norm or body in nd or nd in body:
+                    score = 2
+                else:
+                    score = 0
             else:
                 score = 0
             if score > (best[0] if best else 0):
@@ -175,7 +189,7 @@ def sync_source_images():
 
 # 章节元数据（顺序即侧边栏顺序）
 CHAPTERS = [
-    ("00_封面与目录.md",               "00", "封面与目录",           "0.1–0.3"),
+    ("00_最新更新.md",               "00", "最新更新",             "更新日志"),
     ("01_学院介绍_p1-2.md",            "01", "学院介绍",             "1–2"),
     ("02_强军战歌_p3-4.md",            "02", "强军战歌（军训）",      "3–4"),
     ("03_安全守则_p5-6.md",            "03", "安全守则",             "5–6"),
@@ -256,8 +270,16 @@ def convert(num, lines):
             figid = f"fig-p{pid}-{fig_count}"
             img_file = find_image(num, desc, pid)
             if img_file:
-                # 描述含"图标"的按小图处理（fig-icon），其余走通用插图规则
-                cls = "fig-photo fig-icon" if "图标" in desc else "fig-photo"
+                # 手动档位覆盖优先；其次按描述自动分类尺寸：
+                # App图标 → fig-icon；装饰性小插图（"插图"或位置词）→ fig-deco；其余 → 正常
+                if desc in MANUAL_CLASS_OVERRIDES:
+                    cls = "fig-photo " + MANUAL_CLASS_OVERRIDES[desc]
+                elif "图标" in desc:
+                    cls = "fig-photo fig-icon"
+                elif "插图" in desc or any(w in desc for w in ("标题旁", "右上方", "页面中部", "右下角")):
+                    cls = "fig-photo fig-deco"
+                else:
+                    cls = "fig-photo"
                 print(f"   [图] 章{num} 第{pid}页 已匹配 {img_file}（{cls}）")
                 html.append(
                     f'<figure class="{cls}" id="{figid}">'
