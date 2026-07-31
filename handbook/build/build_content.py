@@ -256,9 +256,11 @@ def convert(num, lines):
             figid = f"fig-p{pid}-{fig_count}"
             img_file = find_image(num, desc, pid)
             if img_file:
-                print(f"   [图] 章{num} 第{pid}页 已匹配 {img_file}")
+                # 描述含"图标"的按小图处理（fig-icon），其余走通用插图规则
+                cls = "fig-photo fig-icon" if "图标" in desc else "fig-photo"
+                print(f"   [图] 章{num} 第{pid}页 已匹配 {img_file}（{cls}）")
                 html.append(
-                    f'<figure class="fig-photo" id="{figid}">'
+                    f'<figure class="{cls}" id="{figid}">'
                     f'<img src="img/{img_file}" alt="{inline(desc)}">'
                     f'</figure>'
                 )

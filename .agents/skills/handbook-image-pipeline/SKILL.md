@@ -20,7 +20,7 @@ description: 厦大新生手册（handbook/）插图流水线：将用户丢进�
 | `handbook/img/img-meta.json` | 自动同步图片 → 占位符描述 的映射（配对的关键依据） |
 | `handbook/js/content.js` | 生成的站点数据（**勿手改**，由脚本生成） |
 | `handbook/index.html` | 引用 content.js / style.css 时带 `?v=N` 版本号 |
-| `handbook/css/style.css` | `.fig-photo` 已统一定义：正文宽 80%、居中、无说明文字 |
+| `handbook/css/style.css` | 尺寸规范：`.fig-photo` 宽 80%、`max-width:573px` 封顶、居中；`.fig-icon` 图标 180px 封顶；无说明文字 |
 
 ## 核心流程（每次补图都做）
 
@@ -66,9 +66,32 @@ cd handbook/build && python build_content.py
 ### ⚠️ 铁律：同页多占位符必须按描述配对，禁止只按页面顺序猜
 第 10 页有两个占位符（德旺穹顶在前、嘉庚建筑群在后），历史上按顺序配对曾把嘉庚图错放到德旺位置。配对依据永远是描述，不是先后顺序。同页按顺序消费只允许发生在"无描述记录的手动英文名文件"上。
 
-## 用户偏好（渲染）
-- 图片**不显示文字描述**（figcaption 已取消）；alt 保留描述，供读屏器使用。
-- 宽度、居中由 CSS 统一处理，构建时无需任何内联样式。
+## 渲染与尺寸规范（宽度封顶策略）
+
+**图片一律不显示文字描述**（figcaption 已取消）；alt 保留描述，供读屏器使用。宽度、居中由 CSS 统一处理，构建输出**不得带任何内联样式**。
+
+### 核心策略：max-width 封顶，而不是按比例拉大
+普通插图若原图小于上限，按**原图大小**显示，绝不强行放大（放大小图会发糊）。宽屏观感、窄屏随文字流收缩、原图本身小于上限时不拉伸，三者由以下两层规则同时满足：
+
+```css
+/* 通用：所有真实插图 */
+.fig-photo { width: 80%; max-width: 573px; text-align: center; }  /* 桌面等效 4/5 观感，封顶 */
+.fig-photo img { display: block; width: 100%; height: auto; }
+
+/* 图标特调：App 图标等小图 1:1 显示，不被拉大 */
+.fig-icon { max-width: 180px; }
+```
+
+### 构建脚本的自动分类（与 CSS 配套，勿拆散）
+构建时按**占位符描述**自动给 figure 加 class：
+- 描述**含"图标"** → `class="fig-photo fig-icon"`（小图 180px 封顶）；
+- 其余 → `class="fig-photo"`（普通插图 573px 封顶）。
+
+⚠️ 这条分类逻辑与 CSS 的 `.fig-icon` 规则是配套的：改了构建脚本的 class 输出而不改 CSS（或反之），特调就会失效。
+
+### 验证要点
+- 图标类 figure 渲染宽度应 ≈180px（`fig-icon`），普通插图桌面 ≈573px、原图更小时取原图尺寸；
+- 窄屏（如 390px 视口）下图片应收缩到文字流 80% 且**无横向溢出**。
 
 ## 防错清单
 - [ ] 构建输出有 `[同步]` / `[图] 章XX 第X页 已匹配` 记录
@@ -77,3 +100,4 @@ cd handbook/build && python build_content.py
 - [ ] `content.js` 版本号已 +1
 - [ ] 浏览器刷新后 `.fig-photo` 数量 = 本次配对的图数，且位置正确
 - [ ] 同页多占位符的章节已逐一看过，无错位
+- [ ] 图标类 figure 渲染宽度 ≈180px、普通插图桌面 ≈573px（或原图更小值）、窄屏无溢出
