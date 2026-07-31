@@ -408,6 +408,11 @@
      ============================================ */
   var resultsPanel = el('search-results');
   var keyword = '';
+  /* 面板挂到 body 顶层：避免被 .hero-content 的 z-index stacking context 困住，
+     导致 z-index:200 压不过轮播控件（z-index:2，同在 root 上下文）而被覆盖 */
+  if (resultsPanel && resultsPanel.parentElement) {
+    document.body.appendChild(resultsPanel);
+  }
 
   /* 把悬浮面板定位到搜索框正下方（fixed 定位，避免被 hero 的 overflow 裁剪） */
   function positionPanel() {
@@ -511,7 +516,7 @@
   /* 点击面板外部时关闭（搜索框、面板、热门搜索标签除外） */
   document.addEventListener('click', function (e) {
     if (resultsPanel.hidden) return;
-    if (e.target.closest && e.target.closest('.hero-search-wrap, .hot-searches')) return;
+    if (e.target.closest && e.target.closest('.hero-search-wrap, .hot-searches, #search-results')) return;
     resultsPanel.hidden = true;
   });
 
