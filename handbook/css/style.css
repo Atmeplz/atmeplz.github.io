@@ -405,6 +405,9 @@ body.sidebar-collapsed .layout { grid-template-columns: 0 minmax(0, 1fr); }
 /* 纸质版装饰性小插图（"标题旁""右上方"等位置描述）：比图标更小巧 */
 .fig-deco { max-width: 160px; }
 
+/* 横幅水印等超扁长图：占满整个文字流宽度 */
+.fig-wide { width: 100%; max-width: 100%; }
+
 /* 表格 */
 .table-wrap {
   overflow-x: auto;
