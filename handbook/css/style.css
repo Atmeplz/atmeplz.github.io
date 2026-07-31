@@ -218,6 +218,9 @@ svg.icon {
   align-items: start;
   transition: grid-template-columns .32s ease;
 }
+/* 关键：网格项目默认 min-width:auto 会以内容最小宽度撑破轨道。
+   宽表格（如社团分类表）在移动端会把整页顶出横向滚动，必须显式归零 */
+#content { min-width: 0; }
 
 /* 桌面端收起侧栏：列宽 264px → 0，平滑过渡 */
 body.sidebar-collapsed .layout { grid-template-columns: 0 minmax(0, 1fr); }
@@ -593,6 +596,16 @@ body.sidebar-collapsed .layout { grid-template-columns: 0 minmax(0, 1fr); }
     padding-top: var(--header-h);
   }
   .content { max-width: none; padding: 20px 16px 48px; }
+  /* 超宽表格移动端独立横滚：容器硬上限=视口宽-页边距（与文字流同宽），
+     表格按内容自然宽度，在容器内左右滑动；桌面端不触发 */
+  .doc-body .table-wrap {
+    max-width: calc(100vw - 32px);
+    -webkit-overflow-scrolling: touch;
+  }
+  .doc-body table {
+    width: max-content;
+    min-width: 100%;
+  }
   /* 页内小标题导航仅桌面端显示 */
   #section-nav { display: none; }
   /* 页头收紧，避免"新生手册"在细长屏换行 */
