@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>本科生新生手册 · 厦门大学信息学院</title>
   <meta name="description" content="厦门大学信息学院（特色化示范性软件学院）本科生新生手册在线版——学院介绍、军训、安全守则、学习攻略、美食出行、校园设施、就医指南、校园网等全收录">
-  <link rel="stylesheet" href="css/style.css?v=21">
+  <link rel="stylesheet" href="css/style.css?v=24">
 </head>
 <body>
   <!-- 页头 -->
@@ -68,7 +68,16 @@
     <svg viewBox="0 0 24 24" class="icon"><path d="m18 15-6-6-6 6"/></svg>
   </button>
 
+  <!-- 插图灯箱：点击图片全屏预览，可缩放拖动，× 或 Esc 关闭 -->
+  <div class="img-lightbox" id="img-lightbox" hidden>
+    <button class="img-lightbox-close" id="img-lightbox-close" aria-label="关闭图片预览">×</button>
+    <div class="img-lightbox-stage" id="img-lightbox-stage">
+      <img id="img-lightbox-img" alt="">
+    </div>
+  </div>
+
   <script src="js/content.js?v=43"></script>
+  <script src="js/lightbox.js?v=1"></script>
   <script src="js/app.js?v=9"></script>
 </body>
 </html>

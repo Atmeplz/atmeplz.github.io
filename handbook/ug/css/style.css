@@ -46,6 +46,10 @@ ul, ol { margin: 0; }
 a { color: inherit; text-decoration: none; }
 button { font-family: inherit; cursor: pointer; }
 
+/* hidden 属性兜底：任何带 display 的自定义元素（灯箱/搜索面板/返回顶部等）
+   用 hidden 隐藏时都不被其 display 规则覆盖（作者样式会盖过浏览器默认的 [hidden]） */
+[hidden] { display: none !important; }
+
 svg.icon {
   width: 1em; height: 1em;
   fill: none; stroke: currentColor;
@@ -348,6 +352,18 @@ body.sidebar-collapsed .layout { grid-template-columns: 0 minmax(0, 1fr); }
   color: var(--text);
 }
 .notice-box p { font-size: 15px; }
+/* 红框里的跳转链接：蓝色 + 下划线 + 斜体，明确可点击（覆盖全局 a 无色无下划线） */
+.notice-box a {
+  color: #2f6fdb;
+  text-decoration: underline;
+  font-style: italic;
+  font-weight: 600;
+  text-underline-offset: 3px;
+}
+.notice-box a:hover {
+  color: var(--primary-dark);
+  text-decoration-thickness: 2px;
+}
 .notice-box mark.notice-key {
   background: #ffe9a8;
   color: #b3410f;
@@ -722,3 +738,61 @@ body.sidebar-collapsed .layout { grid-template-columns: 0 minmax(0, 1fr); }
   .header-search input { font-size: 13px; }
   .prev-next { grid-template-columns: 1fr; }
 }
+
+/* ---------- 插图灯箱 ---------- */
+.img-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: rgba(10, 16, 28, .92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: zoom-out;
+  opacity: 0;
+  transition: opacity .25s ease;
+  touch-action: none; /* 手势完全交给灯箱 */
+}
+.img-lightbox.show { opacity: 1; }
+.img-lightbox-stage {
+  max-width: 94vw;
+  max-height: 94vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  will-change: transform;
+  user-select: none;
+  -webkit-user-drag: none;
+  touch-action: none;
+}
+.img-lightbox-stage:active { cursor: grabbing; }
+.img-lightbox-stage img {
+  max-width: 94vw;
+  max-height: 94vh;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none; /* 事件统一交给 stage，避免图片本身拦截 */
+  box-shadow: 0 10px 40px rgba(0, 0, 0, .5);
+}
+.img-lightbox-close {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  z-index: 2;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .14);
+  color: #fff;
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background .2s;
+}
+.img-lightbox-close:hover { background: rgba(255, 255, 255, .3); }
+body.img-lightbox-open { overflow: hidden; }

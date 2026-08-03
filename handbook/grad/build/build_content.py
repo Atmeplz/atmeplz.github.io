@@ -105,6 +105,8 @@ MANUAL_CLASS_OVERRIDES = {
     "地球与网络信号图标插画": "fig-deco",
     "黄色文件夹与报纸插画": "fig-deco",
     "无旁边标注文字（二维码中央有卡通形象）": "fig-deco",
+    "小灵龙App下载二维码": "fig-deco",
+    "研究生会、团总支招新二维码": "fig-deco",
     "页面背景为信息学院院徽水印，外圈英文\"SCHOOL OF INFORMATICS XIAMEN UNIVERSITY\"": "fig-wide",
     "页面底部为厦门大学建筑群（群贤楼群风格）线描图": "fig-wide",
 }
