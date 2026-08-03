@@ -340,6 +340,17 @@ body.sidebar-collapsed .layout { grid-template-columns: 0 minmax(0, 1fr); }
   padding: 0 1px;
 }
 .doc-body u { text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
+/* 正文里的外链（如"最新通讯录"）：蓝色 + 下划线，明确可点击 */
+.doc-body a {
+  color: #2f6fdb;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  word-break: break-all;
+}
+.doc-body a:hover {
+  color: var(--primary-dark);
+  text-decoration-thickness: 2px;
+}
 
 /* 红色提示框（如 00 章"在寻找研究生新生手册？前往该链接"）。
    将来接入研究生手册后，把框内"前往该链接"五个字换成超链接即可。 */
@@ -352,6 +363,8 @@ body.sidebar-collapsed .layout { grid-template-columns: 0 minmax(0, 1fr); }
   color: var(--text);
 }
 .notice-box p { font-size: 15px; }
+/* 红框内的加粗强调（如"重要提示："）：警示红，与红色警示框呼应 */
+.notice-box strong { color: #c62828; }
 /* 红框里的跳转链接：蓝色 + 下划线 + 斜体，明确可点击（覆盖全局 a 无色无下划线） */
 .notice-box a {
   color: #2f6fdb;

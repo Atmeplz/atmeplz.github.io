@@ -218,11 +218,14 @@ CHAPTERS = [
 FIG_KINDS = ["图片", "二维码", "地图", "截图"]
 
 def inline(text):
-    """行内格式：转义 + 还原 <u> + 粗体"""
+    """行内格式：转义 + 还原 <u> + 粗体 + 链接 [文字](网址)"""
     text = text.replace("<u>", "\x00U\x00").replace("</u>", "\x00/U\x00")
     text = (text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
     text = text.replace("\x00U\x00", "<u>").replace("\x00/U\x00", "</u>")
     text = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", text)
+    # md 链接 [文字](url) → 外链新窗口打开（在转义后替换，URL 已安全转义）
+    text = re.sub(r"\[([^\]]+)\]\(([^)\s]+)\)",
+                  r'<a href="\2" target="_blank" rel="noopener">\1</a>', text)
     return text
 
 def convert(num, lines):
@@ -318,22 +321,29 @@ def convert(num, lines):
             i += 1
             continue
 
-        # 表格
+        # 表格（支持无表头：md 表格第一行即分隔行时，全部行按数据行输出）
         if s.startswith("|"):
             tbl = []
             while i < len(lines) and lines[i].strip().startswith("|"):
                 tbl.append(lines[i].strip())
                 i += 1
+            is_headless = False
             rows = []
-            for r in tbl:
+            for k, r in enumerate(tbl):
                 cells = [c.strip() for c in r.strip("|").split("|")]
                 if all(re.fullmatch(r":?-{2,}:?", c or "---") for c in cells):
+                    if k == 0:
+                        is_headless = True  # 首行即分隔行 → 无表头
                     continue  # 分隔行
                 rows.append(cells)
             if rows:
                 out = ['<div class="table-wrap"><table>']
-                head, body = rows[0], rows[1:]
-                if any(head):
+                if is_headless:
+                    body = rows
+                    head = None
+                else:
+                    head, body = rows[0], rows[1:]
+                if head is not None and any(head):
                     out.append("<thead><tr>" + "".join(f"<th>{inline(c)}</th>" for c in head) + "</tr></thead>")
                 out.append("<tbody>")
                 for r in body:
