@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-手册内容 md -> handbook/js/content.js 转换脚本
+本科新生手册内容 md -> handbook/ug/js/content.js 转换脚本
 用法：python build_content.py
-输入：../手册内容/*.md（按文件名排序）
-输出：../js/content.js（window.HANDBOOK_DATA）
+输入：../../手册内容/本科/*.md（按文件名排序）
+输出：../js/content.js（window.HANDBOOK_UG_DATA）
 """
 import json
 import os
@@ -11,12 +11,16 @@ import re
 import shutil
 import sys
 
+# 手册标识（英文目录名 / 全局数据变量名），将来每本手册一份独立子站：
+#   本科 -> ug（本脚本），研究生 -> grad，变量名对应 HANDBOOK_UG_DATA / HANDBOOK_GRAD_DATA
+BOOK_ID = "ug"
+
 BASE = os.path.dirname(os.path.abspath(__file__))
-SRC = os.path.join(BASE, "..", "..", "手册内容")
+SRC = os.path.join(BASE, "..", "..", "..", "手册内容", "本科")
 OUT = os.path.join(BASE, "..", "js", "content.js")
 
 # 插图目录与命名规则：
-#   handbook/img/ 是站点内唯一插图目录（构建时读取并生成 img/{文件名} 引用）。
+#   handbook/ug/img/ 是该子站唯一插图目录（构建时读取并生成 img/{文件名} 引用）。
 #   - 自动同步的图：{章号}-p{页码}-img{该章第N张图}.png（由 sync_source_images 生成）
 #   - 手动命名：{章号}{描述}.png（中文描述，精确匹配）或 {章号}-p{页码}-{英文}.png（按页码匹配）
 IMG_DIR = os.path.join(BASE, "..", "img")
@@ -141,7 +145,7 @@ def collect_placeholders():
 
 
 def sync_source_images():
-    """把 手册内容/手册插入图片/ 里的自然语言命名图片匹配到占位符，剪切到 handbook/img/。
+    """把 手册内容/本科/手册插入图片/ 里的自然语言命名图片匹配到占位符，剪切到 handbook/ug/img/。
 
     匹配规则（按优先级）：
     1) 文件名与某占位符描述完全相同；
@@ -261,6 +265,20 @@ def convert(num, lines):
         if s == "<!-- 封底 -->":
             cur_page = "封底"
             i += 1
+            continue
+        # 原始 HTML 透传：`<!-- RAW-HTML -->` 与 `<!-- /RAW-HTML -->` 之间的行原样输出，
+        # 不做转义/解析，用于普通 md 语法表达不了的提示框等（如 00 章的"研究生手册"红框）
+        if s == "<!-- RAW-HTML -->":
+            raw = []
+            i += 1
+            while i < len(lines):
+                if lines[i].strip() == "<!-- /RAW-HTML -->":
+                    i += 1
+                    break
+                raw.append(lines[i])
+                i += 1
+            if raw:
+                html.append("\n".join(raw))
             continue
         if s.startswith("<!--"):
             i += 1
@@ -396,6 +414,10 @@ def main():
     IMG_FILES = scan_images()
     global IMG_META
     IMG_META.update(load_img_meta())
+    # 无论本轮是否同步了新图，都确保 img-meta.json 带手册标识（多手册并存时用于区分）
+    if IMG_META.get("category") != BOOK_ID:
+        IMG_META["category"] = BOOK_ID
+        save_img_meta(IMG_META)
     print(f"插图目录扫描：{len(IMG_FILES)} 个文件 -> {IMG_FILES or '(空)'}")
     chapters = []
     for fname, num, title, pages in CHAPTERS:
@@ -411,7 +433,8 @@ def main():
 
     data = {
         "meta": {
-            "bookTitle": "新生手册 2025",
+            "category": BOOK_ID,
+            "bookTitle": "本科新生手册 2025",
             "org": "厦门大学信息学院（特色化示范性软件学院）",
             "producedBy": "厦门大学信息学院团委 · 学生会 · 本科生团总支 出品",
             "source": "原书扫描页 0.1–46 + 封底，经文字识别与人工校对",
@@ -421,7 +444,7 @@ def main():
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, "w", encoding="utf-8") as f:
         f.write("// 由 build/build_content.py 自动生成，请勿手改；改内容请编辑 md 后重新生成\n")
-        f.write("window.HANDBOOK_DATA = ")
+        f.write(f"window.HANDBOOK_{BOOK_ID.upper()}_DATA = ")
         f.write(json.dumps(data, ensure_ascii=False, indent=1))
         f.write(";\n")
     print(f"\n生成 {os.path.relpath(OUT, BASE)}，共 {len(chapters)} 章")

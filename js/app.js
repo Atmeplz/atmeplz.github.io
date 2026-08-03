@@ -71,7 +71,7 @@
     esc(D.siteName) + '<br><span class="accent">' + esc(D.platformName) + '</span>';
   el('hero-subtitle').textContent = D.heroSubtitle;
   el('search-input').placeholder = D.searchPlaceholder;
-  el('timeline-title').textContent = '2026级新生时间线';
+  el('timeline-title').textContent = '本科新生时间线';
   el('links-title').textContent = '常用系统入口';
   el('footer-name').textContent = D.siteName;
   el('footer-tagline').textContent = D.footerTagline;
@@ -281,12 +281,20 @@
      时间线、分类指南等内容一并纳入搜索，按相关度排序。 */
   var SEARCH_THRESHOLD = 0.5; // 覆盖率 ≥ 50% 视为相关
 
-  /* 手册搜索索引：把《新生手册》各章 HTML 拆成文本块，记录就近标题作为跳转锚点。
-     与 handbook/js/app.js 的 buildIndex 同思路，仅服务首页搜索框。 */
-  var handbookIndex = [];
+  /* 搜索范围：'ug' 本科（默认）｜'grad' 研究生（待接入） */
+  var scope = 'ug';
 
-  function buildHandbookIndex() {
-    var H = window.HANDBOOK_DATA;
+  /* 手册搜索索引：把各本《新生手册》的章节 HTML 拆成文本块，记录就近标题作为跳转锚点。
+     与 handbook/ug/js/app.js 的 buildIndex 同思路，仅服务首页搜索框。
+     「本」→ 本科手册（HANDBOOK_UG_DATA）；「研」→ 研究生手册（HANDBOOK_GRAD_DATA）。
+     坑位说明：研究生手册尚未接入（gradAvailable = false），一旦根站页面用
+     <script src="handbook/grad/js/content.js"> 加载了 HANDBOOK_GRAD_DATA，
+     索引会自动建立、研模式搜索即生效，无需再改逻辑。 */
+  var handbookIndex = [];
+  var gradHandbookIndex = [];
+  var gradAvailable = !!window.HANDBOOK_GRAD_DATA;
+
+  function buildIndexFor(H, sink) {
     if (!H || !H.chapters || !H.chapters.length) return;
     var container = document.createElement('div');
     H.chapters.forEach(function (c) {
@@ -300,7 +308,7 @@
         }
         var text = el.textContent.replace(/\s+/g, ' ').trim();
         if (text.length < 4) return;
-        handbookIndex.push({
+        sink.push({
           cid: c.id,
           ctitle: c.title,
           anchor: currentAnchor,
@@ -311,7 +319,8 @@
       });
     });
   }
-  buildHandbookIndex();
+  buildIndexFor(window.HANDBOOK_UG_DATA, handbookIndex);
+  buildIndexFor(window.HANDBOOK_GRAD_DATA, gradHandbookIndex);
 
   function searchScore(text, kw) {
     if (text.indexOf(kw) !== -1) return 2;
@@ -333,6 +342,11 @@
   /* 全站搜索：返回按相关度排序的统一结果列表 */
   function searchAll(kw) {
     var results = [];
+
+    /* 范围=研：只搜研究生手册（问答/时间线/指南均为本科向内容，不参与） */
+    if (scope === 'grad') {
+      return gradHits(gradHandbookIndex, 'handbook/grad/index.html#/', kw, 15);
+    }
 
     D.faqs.forEach(function (f) {
       if (f.pinned) return; /* 置顶资料条（下载类）不参与全站搜索 */
@@ -365,7 +379,7 @@
       }
     });
 
-    /* 《新生手册》：命中文本块按相关度排序，同小节只保留一条，最多 6 条 */
+    /* 《本科新生手册》：命中文本块按相关度排序，同小节只保留一条，最多 6 条 */
     var hbHits = [];
     handbookIndex.forEach(function (h) {
       var s = searchScore(h.text, kw);
@@ -389,7 +403,7 @@
         body: (h.heading && h.heading !== h.ctitle ? h.heading + '：' : '') + snippet(h.text, kw),
         meta: h.cid,
         score: r.score,
-        href: 'handbook/index.html#/' + h.cid + '/' + encodeURIComponent(h.anchor)
+        href: 'handbook/ug/index.html#/' + h.cid + '/' + encodeURIComponent(h.anchor)
       });
       hbCount++;
     });
@@ -400,6 +414,39 @@
       if (a.type !== '手册' && b.type === '手册') return -1;
       return b.score - a.score;
     });
+  }
+
+  /* 研究生手册命中：与本科手册同一套评分/去重，返回手册类型结果（上限 max 条）。
+     href 拼到 handbook/grad/ 下，将来接入研究生手册后跳转即生效。 */
+  function gradHits(index, baseHref, kw, max) {
+    var hits = [];
+    index.forEach(function (h) {
+      var s = searchScore(h.text, kw);
+      if (s < SEARCH_THRESHOLD) return;
+      var score = s + (h.isHeading ? 0.5 : 0) + (h.text.indexOf(kw) === 0 ? 0.3 : 0);
+      hits.push({ h: h, score: score });
+    });
+    hits.sort(function (a, b) { return b.score - a.score; });
+    var seen = {};
+    var count = 0;
+    var out = [];
+    hits.forEach(function (r) {
+      if (count >= max) return;
+      var h = r.h;
+      var key = h.cid + '|' + (h.anchor || '');
+      if (seen[key]) return;
+      seen[key] = 1;
+      out.push({
+        type: '手册',
+        title: h.ctitle,
+        body: (h.heading && h.heading !== h.ctitle ? h.heading + '：' : '') + snippet(h.text, kw),
+        meta: h.cid,
+        score: r.score,
+        href: baseHref + h.cid + '/' + encodeURIComponent(h.anchor)
+      });
+      count++;
+    });
+    return out;
   }
 
   /* ============================================
@@ -447,7 +494,13 @@
       '</div>';
 
     if (items.length === 0) {
-      html += '<div class="sr-empty">没有找到相关内容，换个关键词试试吧</div>';
+      if (scope === 'grad' && !gradAvailable) {
+        /* 坑位：研究生手册尚未接入，研模式提示即将上线 */
+        html += '<div class="sr-empty"><strong>研究生新生手册即将上线</strong>' +
+                '<p>本平台的答疑内容面向本科生；研究生手册接入后，切到「研」即可在此搜索研究生相关指南。</p></div>';
+      } else {
+        html += '<div class="sr-empty">没有找到相关内容，换个关键词试试吧</div>';
+      }
     } else {
       var typeCls = { '问答': 'sr-type-faq', '时间线': 'sr-type-timeline', '指南': 'sr-type-category', '手册': 'sr-type-handbook' };
       html += '<div class="search-results-list">' + items.map(function (r) {
@@ -498,6 +551,25 @@
     e.preventDefault();
     applySearch(el('search-input').value);
   });
+
+  /* 搜索范围滑块：「本」=本科手册+答疑内容；「研」=研究生手册（坑位，待接入）。
+     切换后若搜索框已有词，立即按新范围重算结果。 */
+  var scopeToggle = el('scope-toggle');
+  if (scopeToggle) {
+    scopeToggle.addEventListener('click', function (e) {
+      var btn = e.target.closest('.scope-btn');
+      if (!btn || btn.classList.contains('active')) return;
+      var next = btn.dataset.scope;
+      scope = next;
+      scopeToggle.querySelectorAll('.scope-btn').forEach(function (b) {
+        var on = b === btn;
+        b.classList.toggle('active', on);
+        b.setAttribute('aria-pressed', String(on));
+      });
+      scopeToggle.classList.toggle('scope-grad', scope === 'grad');
+      if (keyword.trim()) renderSearchResults();
+    });
+  }
   /* 输入时实时更新结果面板 */
   el('search-input').addEventListener('input', function () {
     keyword = this.value;

@@ -71,7 +71,33 @@ python -m http.server 8765
 # 打开 http://127.0.0.1:8765/
 ```
 
-## 部署
+## 部署（GitHub Pages）
 
-整个文件夹原样上传到任意静态托管（GitHub Pages、Gitee Pages、
-对象存储、学校服务器）即可，无需构建。
+本项目是 **GitHub Pages 用户站点**（`atmeplz.github.io`），仓库 `main` 分支根目录即网站根目录，
+推送 `main` 后由 GitHub Pages 自动构建发布。
+
+### 线上地址
+
+| 页面 | 地址 |
+|---|---|
+| 主站（新生答疑平台） | `https://atmeplz.github.io/` |
+| 本科新生手册子站 | `https://atmeplz.github.io/handbook/ug/` |
+
+### 更新步骤
+
+1. 提交并推送：
+   ```bash
+   git add -A
+   git commit -m "更新内容"
+   git push origin main
+   ```
+2. 等待约 1 分钟，GitHub Pages 自动部署完成，刷新线上页面即可。
+
+### 说明
+
+- 仓库根目录的 `.nojekyll`（空文件）禁止 GitHub Pages 走 Jekyll 构建，
+  保证所有目录/文件（含点开头的）原样发布。
+- 全站内部链接统一使用**完整文件名+后缀**（如 `handbook/ug/index.html`、
+  `js/app.js`、`pic/photos.js`），链接自洽、无死链，可直接在静态托管下运行。
+- 纯静态、零依赖、可离线运行，无需任何构建步骤。
+

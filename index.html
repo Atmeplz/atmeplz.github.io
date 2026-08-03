@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>厦大信院本科新生答疑</title>
-  <meta name="description" content="厦门大学信息学院2026级本科新生答疑平台——解答你的每一个疑问，开启精彩的大学生活">
-  <link rel="stylesheet" href="css/style.css?v=12">
+  <title>厦大信院新生答疑</title>
+  <meta name="description" content="厦门大学信息学院2026级新生答疑平台——解答你的每一个疑问，开启精彩的大学生活">
+  <link rel="stylesheet" href="css/style.css?v=15">
 </head>
 <body>
   <!-- 页头导航 -->
@@ -35,6 +35,12 @@
         <h1 id="hero-title"></h1>
         <p id="hero-subtitle" class="hero-subtitle"></p>
         <div class="hero-search-wrap">
+          <!-- 搜索范围切换：本（本科手册+答疑）｜研（研究生手册，待接入） -->
+          <div class="scope-toggle" id="scope-toggle" role="group" aria-label="搜索范围">
+            <span class="scope-thumb" aria-hidden="true"></span>
+            <button type="button" class="scope-btn active" data-scope="ug" aria-pressed="true">本</button>
+            <button type="button" class="scope-btn" data-scope="grad" aria-pressed="false">研</button>
+          </div>
           <form id="hero-search" class="hero-search" role="search">
             <span data-icon="search" class="search-icon"></span>
             <input type="search" id="search-input" autocomplete="off">
@@ -63,21 +69,36 @@
       </button>
     </section>
 
-    <!-- 新生手册（推广入口） -->
+    <!-- 新生手册（推广入口，上下并排：本科｜研究生坑位） -->
     <section id="handbook" class="section section-muted">
       <div class="container">
-        <div class="handbook-card reveal">
-          <div class="handbook-info">
-            <div class="handbook-icon"><span data-icon="book-open"></span></div>
-            <div class="handbook-text">
-              <h2 class="handbook-title">新生手册 <span class="badge-new">NEW</span></h2>
-              <p class="handbook-desc">信息学院团委 · 学生会出品的新生手册在线版：学院介绍、军训须知、学习攻略、美食出行、校园设施、就医指南全收录，支持章节目录、全文搜索与页内跳转。</p>
-              <div class="handbook-tags">
-                <span>学院介绍</span><span>军训须知</span><span>学习攻略</span><span>校内美食</span><span>出行指南</span><span>校园网</span>
+        <div class="hb-stack reveal">
+          <div class="handbook-card">
+            <div class="handbook-info">
+              <div class="handbook-icon"><span data-icon="book-open"></span></div>
+              <div class="handbook-text">
+                <h2 class="handbook-title">本科生新生手册 <span class="badge-new">NEW</span></h2>
+                <p class="handbook-desc">信息学院团委 · 学生会出品的本科生新生手册在线版：学院介绍、军训须知、学习攻略、美食出行、校园设施、就医指南全收录，支持章节目录、全文搜索与页内跳转。</p>
+                <div class="handbook-tags">
+                  <span>学院介绍</span><span>军训须知</span><span>学习攻略</span><span>校内美食</span><span>出行指南</span><span>校园网</span>
+                </div>
               </div>
             </div>
+            <a class="handbook-cta" href="handbook/ug/index.html">开始阅读<span data-icon="chevron-right"></span></a>
           </div>
-          <a class="handbook-cta" href="handbook/index.html">开始阅读<span data-icon="chevron-right"></span></a>
+          <div class="handbook-card hb-card-grad">
+            <div class="handbook-info">
+              <div class="handbook-icon"><span data-icon="book-open"></span></div>
+              <div class="handbook-text">
+                <h2 class="handbook-title">研究生新生手册 <span class="badge-soon">即将上线</span></h2>
+                <p class="handbook-desc">面向研究生的新生指南正在筹备中，将收录学院介绍、导师与科研、学术规范、生活服务等板块，敬请期待。</p>
+                <div class="handbook-tags">
+                  <span>学院介绍</span><span>学术科研</span><span>导师选择</span><span>生活服务</span>
+                </div>
+              </div>
+            </div>
+            <span class="handbook-cta hb-cta-disabled" aria-disabled="true">即将上线</span>
+          </div>
         </div>
       </div>
     </section>
@@ -86,8 +107,8 @@
     <section id="faq" class="section">
       <div class="container">
         <div class="section-head">
-          <h2>常见问题</h2>
-          <p>点击板块卡片查看问答，支持板块内搜索</p>
+          <h2>常见问题（本科）</h2>
+          <p>点击板块卡片查看问答，支持板块内搜索。本内容基于本科生问答整理，研究生仅供参考</p>
         </div>
         <div class="category-grid" id="category-grid"></div>
       </div>
@@ -193,8 +214,8 @@
 
 <script src="pic/photos.js?v=1"></script>
 <script src="pic/more_web/photos-more.js?v=1"></script>
-<script src="js/data.js?v=28"></script>
-<script src="handbook/js/content.js?v=38"></script>
-<script src="js/app.js?v=32"></script>
+<script src="js/data.js?v=29"></script>
+<script src="handbook/ug/js/content.js?v=42"></script>
+<script src="js/app.js?v=37"></script>
 </body>
 </html>

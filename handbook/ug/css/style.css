@@ -337,6 +337,25 @@ body.sidebar-collapsed .layout { grid-template-columns: 0 minmax(0, 1fr); }
 }
 .doc-body u { text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
 
+/* 红色提示框（如 00 章"在寻找研究生新生手册？前往该链接"）。
+   将来接入研究生手册后，把框内"前往该链接"五个字换成超链接即可。 */
+.notice-box {
+  border: 1px solid #f2b8b8;
+  border-left: 4px solid #e04848;
+  background: #fdf0f0;
+  border-radius: 10px;
+  padding: 11px 16px;
+  color: var(--text);
+}
+.notice-box p { font-size: 15px; }
+.notice-box mark.notice-key {
+  background: #ffe9a8;
+  color: #b3410f;
+  font-weight: 700;
+  padding: 0 4px;
+  border-radius: 4px;
+}
+
 .doc-list { padding-left: 22px; display: flex; flex-direction: column; gap: 6px; font-size: 15px; }
 .doc-list ul.doc-sub { padding-left: 20px; margin-top: 6px; display: flex; flex-direction: column; gap: 4px; }
 .doc-list li::marker { color: var(--primary); }
@@ -614,8 +633,10 @@ body.sidebar-collapsed .layout { grid-template-columns: 0 minmax(0, 1fr); }
   }
   /* 页内小标题导航仅桌面端显示 */
   #section-nav { display: none; }
-  /* 页头收紧，避免"新生手册"在细长屏换行 */
-  .header-inner { padding: 0 12px; gap: 10px; }
+  /* 页头收紧，避免"新生手册"在细长屏换行（左侧 7px：☰/品牌整体左移 5px，右侧保持 12px） */
+  .header-inner { padding: 0 12px 0 7px; gap: 10px; }
+  /* 移动端隐藏品牌蓝色图标，只留文字，空间更利索 */
+  .brand-icon { display: none; }
   .brand-text strong { white-space: nowrap; }
   .brand-text small { display: none; }
 

@@ -5,8 +5,8 @@
 
 window.SITE_DATA = {
   "siteName": "厦门大学信息学院",
-  "platformName": "本科新生答疑平台",
-  "badge": "2026级本科新生专属服务平台",
+  "platformName": "新生答疑平台",
+  "badge": "2026级新生专属服务平台",
   "heroSubtitle": "解答你的每一个疑问，开启精彩的大学生活",
   "searchPlaceholder": "搜索你想了解的问题...",
   "hotSearches": [
@@ -49,7 +49,7 @@ window.SITE_DATA = {
     "email": "informatics@xmu.edu.cn"
   },
   "copyright": "© 2026 厦门大学信息学院 版权所有",
-  "footerTagline": "2026级本科新生服务平台",
+  "footerTagline": "2026级新生服务平台",
   "categories": [
     {
       "id": "admission",

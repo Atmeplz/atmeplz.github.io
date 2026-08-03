@@ -1,12 +1,12 @@
 /* ============================================
-   新生手册 2025 · docs 版交互
+   本科生新生手册 2025 · docs 版交互
    hash 路由 + 侧栏 + 页内目录(scrollspy) + 全文搜索
    零依赖，可离线运行
    ============================================ */
 (function () {
   "use strict";
 
-  var DATA = window.HANDBOOK_DATA;
+  var DATA = window.HANDBOOK_UG_DATA;
   var chapters = DATA.chapters;
   var byId = {};
   chapters.forEach(function (c) { byId[c.id] = c; });
@@ -51,7 +51,7 @@
     // 章节头
     els.eyebrow.textContent = "CHAPTER " + c.id;
     els.title.textContent = c.title;
-    document.title = c.title + " · 新生手册";
+    document.title = c.title + " · 本科生新生手册";
 
     // 正文
     els.body.innerHTML = c.html;

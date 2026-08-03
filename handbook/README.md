@@ -1,64 +1,63 @@
-# 新生手册 2025 · docs 版
+# 新生手册 · 多手册子站目录
 
-《厦门大学信息学院 2025 新生手册》的在线文档版，与主站（新生答疑平台）同一视觉语言。
-纯静态 HTML/CSS/JS，**零依赖、可离线运行**，双击 `index.html` 即可打开。
+本站下每本手册是**一套完全独立的子站**（各自的内容源、构建脚本、插图、页面），互不干扰。
 
-## 目录结构
+| 目录 | 手册 | 内容源 | 构建输出 | 全局数据 |
+|---|---|---|---|---|
+| `ug/` | 本科生新生手册 2025 | `../手册内容/本科/` | `ug/js/content.js` | `HANDBOOK_UG_DATA` |
+| `grad/`（待加） | 研究生新生手册 | `../手册内容/研究生/` | `grad/js/content.js` | `HANDBOOK_GRAD_DATA` |
+
+## 结构说明（以 ug/ 为例）
 
 ```
 handbook/
-├── index.html            页面骨架（页头/侧栏/正文/右栏页内导航）
-├── css/
-│   └── style.css         全部样式（docs 三栏布局、响应式、动效）
-├── js/
-│   ├── content.js        ★ 手册全部内容（由脚本生成，勿手改）
-│   └── app.js            路由 / 侧栏 / 页内目录 / 全文搜索逻辑
-└── build/
-    └── build_content.py  内容生成脚本（md → content.js）
+├── README.md            本说明
+└── ug/                  本科手册子站
+    ├── index.html       页面骨架（改书名/链接时动这里）
+    ├── css/style.css    样式
+    ├── js/
+    │   ├── content.js   ★ 手册内容（由构建脚本生成，勿手改）
+    │   └── app.js       路由 / 侧栏 / 页内目录 / 全文搜索
+    ├── img/             插图 + img-meta.json（含 "category": "ug" 标记）
+    └── build/
+        └── build_content.py   构建脚本
 ```
 
-## 功能
+## 各子站内部
 
-- **Hash 路由**：`index.html#/05` 直达某章，`#/02/c02-h2` 直达某节，可分享、可前进后退
-- **全文搜索**：页头搜索框，支持标题/正文/表格/图注，按 `/` 快速聚焦，↑↓ 选择、回车跳转，命中段落闪烁高亮
-- **左侧章节目录**：17 章；页头 ☰ 按钮可收起/展开（桌面端折叠为单栏宽屏，移动端为抽屉式、默认收起）
-- **页内小标题导航**：桌面端右侧锚点圆点，悬浮展开标签、点击跳转、滚动高亮（移动端不显示）
-- **上一章 / 下一章**、返回顶部、主站互链（页头"答疑首页"）
+```
+handbook/ug/README.md    ug 子站使用说明（构建 / 预览 / 插图）
+```
 
-## 如何修改内容
+## 修改内容
 
-1. 编辑 `手册内容/*.md`（源头文本）
+1. 编辑对应子站的内容源 md（如 `手册内容/本科/*.md`）
 2. 重新生成：
    ```bash
-   cd handbook/build
-   python build_content.py
+   python handbook/ug/build/build_content.py
    ```
-3. 刷新页面即可
+3. 刷新页面即可（若浏览器仍显示旧内容，把对应 `index.html` 里 `content.js?v=N` 的 N +1）
 
-## 插图补入指南
+## 根站（答疑首页）如何接入
 
-正文中的虚线框是插图占位符，每个都有稳定 id，格式为 `fig-p{页码}-{序号}`，例如：
+- `index.html`：用 `<script src="handbook/ug/js/content.js?v=N">` 加载各册数据；
+  「开始阅读」卡片指向 `handbook/ug/index.html`
+- `js/app.js`：`buildHandbookIndex()` 读 `window.HANDBOOK_UG_DATA` 建搜索索引；
+  手册搜索结果的跳转链接指向 `handbook/ug/index.html#/章节`
 
-```html
-<figure class="fig-placeholder" data-kind="图片" id="fig-p14-1">
-```
+## 如何加一本新手册（以研究生手册 grad 为例）
 
-补图时把对应 `<figure>` 整体替换为：
+1. 建内容源目录 `手册内容/研究生/`，放各章 md（命名、占位符格式与本科一致）
+2. 复制 `ug/` 整站为 `grad/`：
+   ```bash
+   cp -r handbook/ug handbook/grad
+   ```
+3. 改 `grad/build/build_content.py` 顶部的 `BOOK_ID = "grad"`，并把
+   `SRC` 里的「本科」改成「研究生」
+4. 删掉 `grad/img/` 里的旧图，重新放新图；重建 content.js
+5. 改 `grad/index.html` 的书名文案，并在根站 `index.html` 里
+   追加 `<script src="handbook/grad/js/content.js">`；搜索逻辑里并列读
+   `window.HANDBOOK_GRAD_DATA` 即可
 
-```html
-<figure class="fig-photo">
-  <img src="img/p14-1.jpg" alt="（图片描述）">
-</figure>
-```
-
-建议图片放在 `handbook/img/` 下，从原书扫描页裁切（`C:\Users\Atmeplz\Downloads\新生手册\`）。
-占位的 `data-kind` 标明了类型：图片 / 二维码 / 地图 / 截图。
-
-## 本地预览
-
-直接双击 `index.html`，或：
-
-```bash
-python -m http.server 8765
-# 打开 http://127.0.0.1:8765/handbook/
-```
+> 每本手册数据用独立全局变量（`HANDBOOK_UG_DATA` / `HANDBOOK_GRAD_DATA`…），
+> 多册可同时被根站加载而不互相覆盖。

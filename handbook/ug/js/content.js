@@ -1,7 +1,8 @@
 // 由 build/build_content.py 自动生成，请勿手改；改内容请编辑 md 后重新生成
-window.HANDBOOK_DATA = {
+window.HANDBOOK_UG_DATA = {
  "meta": {
-  "bookTitle": "新生手册 2025",
+  "category": "ug",
+  "bookTitle": "本科新生手册 2025",
   "org": "厦门大学信息学院（特色化示范性软件学院）",
   "producedBy": "厦门大学信息学院团委 · 学生会 · 本科生团总支 出品",
   "source": "原书扫描页 0.1–46 + 封底，经文字识别与人工校对"
@@ -11,7 +12,7 @@ window.HANDBOOK_DATA = {
    "id": "00",
    "title": "最新更新",
    "pages": "更新日志",
-   "html": "<p>&gt; 本手册在线版会持续补入插图、修订内容，更新记录将在此汇总。</p>\n<h2 id=\"c00-h1\">更新记录</h2>\n<div class=\"table-wrap\"><table><thead><tr><th>日期</th><th>更新内容</th></tr></thead><tbody><tr><td>2026-07-31</td><td>补入第 2、3、4、5、6、7、8、12、15 章插图；新增插图尺寸分档（App 图标、装饰小图、线路图/大图）；上线插图自动补入流水线，图片可随章节内容持续更新</td></tr></tbody></table></div>\n<h2 id=\"c00-h2\">章节索引</h2>\n<div class=\"table-wrap\"><table><thead><tr><th>章节</th></tr></thead><tbody><tr><td>学院介绍</td></tr><tr><td>强军战歌</td></tr><tr><td>安全守则</td></tr><tr><td>学习攻略</td></tr><tr><td>第二课堂</td></tr><tr><td>校内美食攻略</td></tr><tr><td>出行指南</td></tr><tr><td>运动</td></tr><tr><td>校园设施</td></tr><tr><td>证件办理、充值及使用</td></tr><tr><td>就医指南</td></tr><tr><td>常用网址、公众号、电话及APP</td></tr><tr><td>校园网、VPN连接</td></tr><tr><td>学生会、本科生团总支</td></tr><tr><td>社团及组织</td></tr><tr><td>结尾寄语</td></tr></tbody></table></div>"
+   "html": "<div class=\"notice-box\">\n  <p>在寻找<mark class=\"notice-key\">研究生新生手册</mark>？前往该链接。</p>\n</div>\n<p>&gt; 本手册在线版会持续补入插图、修订内容，更新记录将在此汇总。</p>\n<h2 id=\"c00-h1\">更新记录</h2>\n<div class=\"table-wrap\"><table><thead><tr><th>日期</th><th>更新内容</th></tr></thead><tbody><tr><td>2026-08-03</td><td>第 02 章正式定名「军训」，章节索引同步改名并修正链接</td></tr><tr><td>2026-07-31</td><td>补入第 2、3、4、5、6、7、8、12、15 章插图；新增插图尺寸分档（App 图标、装饰小图、线路图/大图）；上线插图自动补入流水线，图片可随章节内容持续更新</td></tr></tbody></table></div>\n<h2 id=\"c00-h2\">章节索引</h2>\n<div class=\"table-wrap\"><table><thead><tr><th>章节</th></tr></thead><tbody><tr><td>学院介绍</td></tr><tr><td>军训</td></tr><tr><td>安全守则</td></tr><tr><td>学习攻略</td></tr><tr><td>第二课堂</td></tr><tr><td>校内美食攻略</td></tr><tr><td>出行指南</td></tr><tr><td>运动</td></tr><tr><td>校园设施</td></tr><tr><td>证件办理、充值及使用</td></tr><tr><td>就医指南</td></tr><tr><td>常用网址、公众号、电话及APP</td></tr><tr><td>校园网、VPN连接</td></tr><tr><td>学生会、本科生团总支</td></tr><tr><td>社团及组织</td></tr><tr><td>结尾寄语</td></tr></tbody></table></div>"
   },
   {
    "id": "01",

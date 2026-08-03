@@ -1,6 +1,6 @@
 ---
 name: handbook-image-pipeline
-description: 厦大新生手册（handbook/）插图流水线：将用户丢进「手册内容/手册插入图片/」的自然语言命名图片，自动匹配 md 中的【图片：描述】占位符、剪切到 handbook/img/ 规范命名、重建 content.js 并正确配位。每当用户说"补图""放图""插图""插图片""图片放进去了""加图片"，或提到 手册内容/手册插入图片、插图占位符、fig-placeholder、插图待补 时使用；也用于校验插图位置与修复插图错位。
+description: 厦大新生手册（handbook/ug/）插图流水线：将用户丢进「手册内容/本科/手册插入图片/」的自然语言命名图片，自动匹配 md 中的【图片：描述】占位符、剪切到 handbook/ug/img/ 规范命名、重建 content.js 并正确配位。每当用户说"补图""放图""插图""插图片""图片放进去了""加图片"，或提到 手册内容/本科/手册插入图片、插图占位符、fig-placeholder、插图待补 时使用；也用于校验插图位置与修复插图错位。
 ---
 
 # 新生手册插图流水线
@@ -13,34 +13,34 @@ description: 厦大新生手册（handbook/）插图流水线：将用户丢进�
 
 | 路径 | 作用 |
 |---|---|
-| `手册内容/` | 各章 md 源文件（`{章号}_{章节}_p*.md`），内容与占位符的源头 |
-| `手册内容/手册插入图片/` | **用户放图的地方**（自然语言命名，随便起名）；构建时会被清空（剪切走） |
-| `handbook/build/build_content.py` | 构建脚本：同步源图 + 扫描匹配 + 生成 content.js |
-| `handbook/img/` | 规范命名后的成品图（`{章号}-p{页码}-img{序号}.png`） |
-| `handbook/img/img-meta.json` | 自动同步图片 → 占位符描述 的映射（配对的关键依据） |
-| `handbook/js/content.js` | 生成的站点数据（**勿手改**，由脚本生成） |
-| `handbook/index.html` | 引用 content.js / style.css 时带 `?v=N` 版本号 |
-| `handbook/css/style.css` | 尺寸规范：`.fig-photo` 宽 80%、`max-width:573px` 封顶、居中；`.fig-icon` 图标 180px 封顶；无说明文字 |
+| `手册内容/本科/` | 各章 md 源文件（`{章号}_{章节}_p*.md`），内容与占位符的源头 |
+| `手册内容/本科/手册插入图片/` | **用户放图的地方**（自然语言命名，随便起名）；构建时会被清空（剪切走） |
+| `handbook/ug/build/build_content.py` | 构建脚本：同步源图 + 扫描匹配 + 生成 content.js |
+| `handbook/ug/img/` | 规范命名后的成品图（`{章号}-p{页码}-img{序号}.png`） |
+| `handbook/ug/img/img-meta.json` | 自动同步图片 → 占位符描述 的映射（配对的关键依据） |
+| `handbook/ug/js/content.js` | 生成的站点数据（**勿手改**，由脚本生成） |
+| `handbook/ug/index.html` | 引用 content.js / style.css 时带 `?v=N` 版本号 |
+| `handbook/ug/css/style.css` | 尺寸规范：`.fig-photo` 宽 80%、`max-width:573px` 封顶、居中；`.fig-icon` 图标 180px 封顶；无说明文字 |
 
 ## 核心流程（每次补图都做）
 
 ### 1. 确认源图（必须做，勿跳过）
-列出 `手册内容/手册插入图片/`，确认用户放进去的图片，**并逐一核对每张图应归的尺寸档位**（图标/装饰小图/大图），必要时加入 `MANUAL_CLASS_OVERRIDES`。
+列出 `手册内容/本科/手册插入图片/`，确认用户放进去的图片，**并逐一核对每张图应归的尺寸档位**（图标/装饰小图/大图），必要时加入 `MANUAL_CLASS_OVERRIDES`。
 
 ⚠️ 构建脚本会自动同步源目录里**所有**图片——即使本次任务只是删占位符/改文字，只要源目录有新图，构建就会把它们导进去。因此**每次构建前都必须先列源目录**，确认有无新图及其正确档位；若用户没提新图、但源目录有，主动向用户确认（是否同步、什么尺寸档位），不要静默处理。
 
 ### 2. 运行构建
 ```bash
-cd handbook/build && python build_content.py
+cd handbook/ug/build && python build_content.py
 ```
-（或 `python handbook/build/build_content.py`，脚本用自身路径定位，在哪跑都行）
+（或 `python handbook/ug/build/build_content.py`，脚本用自身路径定位，在哪跑都行）
 
 脚本自动完成：
-- **同步**：读源目录 → 自然语言匹配占位符 → 剪切到 `handbook/img/{章号}-p{页码}-img{序号}.png` → 把描述写进 `img-meta.json`
-- **构建**：扫描 `handbook/img/` → 每个占位符配对图片 → 生成新的 `js/content.js`
+- **同步**：读源目录 → 自然语言匹配占位符 → 剪切到 `handbook/ug/img/{章号}-p{页码}-img{序号}.png` → 把描述写进 `img-meta.json`
+- **构建**：扫描 `handbook/ug/img/` → 每个占位符配对图片 → 生成新的 `js/content.js`
 
 ### 3. 更新版本号
-把 `handbook/index.html` 里 `content.js?v=N` 的 N +1（若改了 CSS，`style.css?v=N` 也 +1），避免浏览器缓存旧文件。
+把 `handbook/ug/index.html` 里 `content.js?v=N` 的 N +1（若改了 CSS，`style.css?v=N` 也 +1），避免浏览器缓存旧文件。
 
 ### 4. 浏览器验证（重要，防止错位）
 刷新页面，核对每个应配上的占位符：
