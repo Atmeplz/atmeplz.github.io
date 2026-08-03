@@ -71,7 +71,7 @@
     esc(D.siteName) + '<br><span class="accent">' + esc(D.platformName) + '</span>';
   el('hero-subtitle').textContent = D.heroSubtitle;
   el('search-input').placeholder = D.searchPlaceholder;
-  el('timeline-title').textContent = '本科新生时间线';
+  el('timeline-title').textContent = '2026新生时间线';
   el('links-title').textContent = '常用系统入口';
   el('footer-name').textContent = D.siteName;
   el('footer-tagline').textContent = D.footerTagline;
